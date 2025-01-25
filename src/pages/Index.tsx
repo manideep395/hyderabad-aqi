@@ -5,6 +5,8 @@ import LocationGrid from "@/components/LocationGrid";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+  console.log("Index page rendering"); // Adding console log to track rendering
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
