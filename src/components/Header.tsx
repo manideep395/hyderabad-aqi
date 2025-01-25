@@ -24,9 +24,6 @@ const Header = () => {
             <Link to="/" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               Dashboard
             </Link>
-            <Link to="/prediction" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
-              Predictions
-            </Link>
             <Link to="/about" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               About
             </Link>
