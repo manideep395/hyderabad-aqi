@@ -30,6 +30,11 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
     return { color: "bg-aqi-hazardous", status: "Hazardous", icon: AlertTriangle };
   };
 
+  const formatValue = (value: number | undefined): string => {
+    if (value === undefined) return "N/A";
+    return Number.isInteger(value) ? value.toString() : value.toFixed(1);
+  };
+
   // Mock data for the chart
   const chartData = Array.from({ length: 24 }, (_, i) => ({
     time: `${i}:00`,
@@ -62,38 +67,38 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">PM2.5</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.pm25?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.pm25?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">PM10</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.pm10?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.pm10?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">NO2</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.no2?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.no2?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">O3</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.o3?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.o3?.v)}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">SO2</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.so2?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.so2?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">CO</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.co?.v || "N/A"}</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.co?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Temperature</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.t?.v || "N/A"}°C</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.t?.v)}°C</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Humidity</p>
-                <p className="text-2xl font-semibold">{data?.data?.iaqi?.h?.v || "N/A"}%</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.h?.v)}%</p>
               </div>
             </div>
 
