@@ -2,32 +2,32 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          {/* 3D Animated Logo */}
-          <div className="relative w-16 h-16 perspective-1000">
-            <div className="absolute w-full h-full animate-float">
-              <div className="w-full h-full bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-lg transform rotate-3d-1 transition-transform duration-300 hover:scale-110 flex items-center justify-center">
-                <span className="text-white text-3xl font-bold">T</span>
+    <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg z-50">
+      <div className="container mx-auto px-4 py-2">
+        <div className="flex items-center justify-between">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10">
+              <div className="absolute w-full h-full">
+                <div className="w-full h-full bg-white rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-110 flex items-center justify-center">
+                  <span className="text-blue-600 text-xl font-bold">T</span>
+                </div>
               </div>
             </div>
+            <Link to="/" className="text-xl font-bold text-white">
+              Telangana AQI
+            </Link>
           </div>
           
-          {/* Title */}
-          <Link to="/" className="text-2xl font-bold text-gray-800 text-center">
-            Telangana AQI
-          </Link>
-          
           {/* Navigation Menu */}
-          <nav className="flex space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <nav className="flex space-x-6">
+            <Link to="/" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               Dashboard
             </Link>
-            <Link to="/prediction" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link to="/prediction" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               Predictions
             </Link>
-            <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link to="/about" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               About
             </Link>
           </nav>

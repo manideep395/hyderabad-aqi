@@ -34,7 +34,6 @@ const MainDashboard = () => {
   const { data: aqiData, isLoading } = useQuery({
     queryKey: ["telangana-aqi"],
     queryFn: async () => {
-      // Fetch AQI data for all locations
       const responses = await Promise.all(
         locations.map(loc => 
           fetch(`https://api.waqi.info/feed/@${loc.id}/?token=demo`)
@@ -43,16 +42,38 @@ const MainDashboard = () => {
         )
       );
       
-      // Calculate average AQI
-      const validAqis = responses
-        .map(res => res.data?.aqi)
-        .filter(aqi => aqi && typeof aqi === 'number');
+      const validData = responses.filter(res => res.data?.aqi && typeof res.data.aqi === 'number');
       
-      const averageAqi = Math.round(
-        validAqis.reduce((sum, aqi) => sum + aqi, 0) / validAqis.length
-      );
-      
-      return averageAqi || 0;
+      const averages = {
+        aqi: 0,
+        pm25: 0,
+        pm10: 0,
+        no2: 0,
+        o3: 0,
+        co: 0,
+        temperature: 0,
+        humidity: 0,
+        pressure: 0
+      };
+
+      validData.forEach(res => {
+        averages.aqi += res.data.aqi;
+        averages.pm25 += res.data.iaqi?.pm25?.v || 0;
+        averages.pm10 += res.data.iaqi?.pm10?.v || 0;
+        averages.no2 += res.data.iaqi?.no2?.v || 0;
+        averages.o3 += res.data.iaqi?.o3?.v || 0;
+        averages.co += res.data.iaqi?.co?.v || 0;
+        averages.temperature += res.data.iaqi?.t?.v || 0;
+        averages.humidity += res.data.iaqi?.h?.v || 0;
+        averages.pressure += res.data.iaqi?.p?.v || 0;
+      });
+
+      const count = validData.length || 1;
+      Object.keys(averages).forEach(key => {
+        averages[key] = Math.round((averages[key] / count) * 10) / 10;
+      });
+
+      return averages;
     },
   });
 
@@ -64,24 +85,46 @@ const MainDashboard = () => {
     );
   }
 
-  const aqi = aqiData || 0;
+  const data = aqiData || { aqi: 0 };
 
   return (
-    <Card className="p-6 shadow-lg bg-white">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Telangana Average Air Quality</h2>
-        <div className="flex justify-center items-center space-x-4">
-          <div className={`text-6xl font-bold ${getAQIColor(aqi)} bg-opacity-20 rounded-full p-8 shadow-lg transform hover:scale-105 transition-transform duration-300`}>
-            {aqi}
-          </div>
-          <div className="text-left">
-            <p className="text-xl font-semibold">{getAQIText(aqi)}</p>
-            <p className="text-gray-600">Average across 12 locations</p>
+    <div className="space-y-6">
+      <Card className="p-6 shadow-lg bg-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Telangana Average Air Quality</h2>
+          <div className="flex justify-center items-center space-x-4">
+            <div className={`text-5xl font-bold ${getAQIColor(data.aqi)} bg-opacity-20 rounded-full p-6 shadow-lg`}>
+              {data.aqi}
+            </div>
+            <div className="text-left">
+              <p className="text-xl font-semibold">{getAQIText(data.aqi)}</p>
+              <p className="text-gray-600">Average across 12 locations</p>
+            </div>
           </div>
         </div>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard title="PM2.5" value={data.pm25} unit="µg/m³" />
+        <MetricCard title="PM10" value={data.pm10} unit="µg/m³" />
+        <MetricCard title="NO₂" value={data.no2} unit="ppb" />
+        <MetricCard title="O₃" value={data.o3} unit="ppb" />
+        <MetricCard title="CO" value={data.co} unit="ppm" />
+        <MetricCard title="Temperature" value={data.temperature} unit="°C" />
+        <MetricCard title="Humidity" value={data.humidity} unit="%" />
+        <MetricCard title="Pressure" value={data.pressure} unit="hPa" />
       </div>
-    </Card>
+    </div>
   );
 };
+
+const MetricCard = ({ title, value, unit }: { title: string; value: number; unit: string }) => (
+  <Card className="p-4 bg-white">
+    <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+    <p className="text-2xl font-bold mt-1">
+      {value} <span className="text-sm font-normal text-gray-500">{unit}</span>
+    </p>
+  </Card>
+);
 
 export default MainDashboard;
