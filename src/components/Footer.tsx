@@ -5,6 +5,16 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo and Brand Section */}
+          <div className="col-span-1 md:col-span-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary rounded-lg shadow-lg flex items-center justify-center animate-float">
+                <span className="text-white text-2xl font-bold">H</span>
+              </div>
+              <span className="text-xl font-bold text-primary-foreground">Hyderabad AQI Analysis</span>
+            </div>
+          </div>
+
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
@@ -18,8 +28,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2">
-              <li>Email: info@aqianalysis.com</li>
-              <li>Phone: +91 123 456 7890</li>
+              <li>Email: dspraneeth07@gmail.com</li>
+              <li>Phone: +91 7416466619</li>
             </ul>
           </div>
           
@@ -46,7 +56,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-          <p>© 2025 AQI Analysis Platform. All Rights Reserved.</p>
+          <p>© 2025 Hyderabad AQI Analysis Platform. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
