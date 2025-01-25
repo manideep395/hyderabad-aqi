@@ -4,15 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 
 interface LocationCardProps {
   name: string;
+  stationId?: string;
   onViewDetails: () => void;
 }
 
-const LocationCard = ({ name, onViewDetails }: LocationCardProps) => {
+const LocationCard = ({ name, stationId, onViewDetails }: LocationCardProps) => {
   const { data, isLoading } = useQuery({
     queryKey: ["location-aqi", name],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.waqi.info/feed/${name}/?token=demo`
+        stationId
+          ? `https://api.waqi.info/feed/@${stationId}/?token=272ccb02f78daa795dae785ea823e1e39ab01971`
+          : `https://api.waqi.info/feed/${name}/?token=demo`
       );
       return response.json();
     },

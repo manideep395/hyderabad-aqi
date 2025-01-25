@@ -4,15 +4,18 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface LocationModalProps {
   location: string;
+  stationId?: string;
   onClose: () => void;
 }
 
-const LocationModal = ({ location, onClose }: LocationModalProps) => {
+const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => {
   const { data, isLoading } = useQuery({
     queryKey: ["location-details", location],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.waqi.info/feed/${location}/?token=demo`
+        stationId
+          ? `https://api.waqi.info/feed/@${stationId}/?token=272ccb02f78daa795dae785ea823e1e39ab01971`
+          : `https://api.waqi.info/feed/${location}/?token=demo`
       );
       return response.json();
     },
