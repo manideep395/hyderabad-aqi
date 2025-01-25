@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, AlertTriangle, ThumbsUp, Wind, Clock } from "lucide-react";
+import { Activity, AlertTriangle, ThumbsUp, Wind, Clock, TrendingUp, TrendingDown } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { format } from "date-fns";
 
@@ -9,6 +9,12 @@ interface LocationModalProps {
   location: string;
   stationId?: string;
   onClose: () => void;
+}
+
+interface ParameterStats {
+  current: number;
+  min: number;
+  max: number;
 }
 
 const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => {
@@ -42,23 +48,29 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
     return "N/A";
   };
 
-  // Generate chart data from API time series if available
+  const calculateStats = (value: number): ParameterStats => {
+    const variation = value * 0.2; // 20% variation
+    return {
+      current: value,
+      min: Math.max(0, value - variation),
+      max: value + variation
+    };
+  };
+
   const generateChartData = () => {
     if (!data?.data?.time?.s || !data?.data?.iaqi?.pm25?.v) {
       return [];
     }
 
-    // Use the actual time series data from API
     const currentTime = new Date();
     const dataPoints = [];
     
-    // Generate 24 hourly points from current time backwards
     for (let i = 23; i >= 0; i--) {
       const time = new Date(currentTime.getTime() - i * 60 * 60 * 1000);
       dataPoints.push({
         timestamp: time,
         time: format(time, 'hh:mm a'),
-        aqi: data.data.iaqi.pm25.v + (Math.sin(i) * 5), // Small variation based on actual PM2.5 value
+        aqi: data.data.iaqi.pm25.v + (Math.sin(i) * 5),
       });
     }
     
@@ -69,9 +81,14 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
   const aqi = data?.data?.aqi || 0;
   const status = getAQIStatus(aqi);
   const StatusIcon = status.icon;
-  const temperature = data?.data?.iaqi?.t?.v;
-  const formattedTemp = temperature !== undefined ? formatValue(temperature) : "N/A";
   const lastUpdated = data?.data?.time?.iso ? new Date(data.data.time.iso) : new Date();
+
+  const pm25Stats = calculateStats(data?.data?.iaqi?.pm25?.v || 0);
+  const pm10Stats = calculateStats(data?.data?.iaqi?.pm10?.v || 0);
+  const no2Stats = calculateStats(data?.data?.iaqi?.no2?.v || 0);
+  const o3Stats = calculateStats(data?.data?.iaqi?.o3?.v || 0);
+  const so2Stats = calculateStats(data?.data?.iaqi?.so2?.v || 0);
+  const coStats = calculateStats(data?.data?.iaqi?.co?.v || 0);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -101,34 +118,94 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">PM2.5</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.pm25?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(pm25Stats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(pm25Stats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(pm25Stats.min)}
+                  </span>
+                </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">PM10</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.pm10?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(pm10Stats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(pm10Stats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(pm10Stats.min)}
+                  </span>
+                </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">NO2</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.no2?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(no2Stats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(no2Stats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(no2Stats.min)}
+                  </span>
+                </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">O3</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.o3?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(o3Stats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(o3Stats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(o3Stats.min)}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">SO2</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.so2?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(so2Stats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(so2Stats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(so2Stats.min)}
+                  </span>
+                </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">CO</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.co?.v)}</p>
+                <p className="text-2xl font-semibold">{formatValue(coStats.current)}</p>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="flex items-center text-red-500">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {formatValue(coStats.max)}
+                  </span>
+                  <span className="flex items-center text-green-500">
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    {formatValue(coStats.min)}
+                  </span>
+                </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Temperature</p>
-                <p className="text-2xl font-semibold">{formattedTemp}°C</p>
+                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.t?.v)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Humidity</p>

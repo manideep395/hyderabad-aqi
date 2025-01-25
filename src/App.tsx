@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Prediction from "./pages/Prediction";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,7 +16,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  console.log("App component rendering"); // Adding console log to track rendering
+  console.log("App component rendering");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -23,6 +24,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/prediction" element={<Prediction />} />
           </Routes>
         </BrowserRouter>
         <Toaster />
