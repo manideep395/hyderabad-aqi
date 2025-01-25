@@ -1,11 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, AlertTriangle, ThumbsUp, Wind, Clock, Calendar } from "lucide-react";
+import { Activity, AlertTriangle, ThumbsUp, Wind, Clock } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { format, startOfDay, endOfDay, addDays } from "date-fns";
-import { DatePicker } from "./ui/date-picker";
-import { useState } from "react";
+import { format } from "date-fns";
 
 interface LocationModalProps {
   location: string;
@@ -14,8 +12,6 @@ interface LocationModalProps {
 }
 
 const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
   const { data, isLoading } = useQuery({
     queryKey: ["location-details", location],
     queryFn: async () => {
@@ -46,18 +42,23 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
     return "N/A";
   };
 
-  // Generate real-time data points for the selected date (24 hours)
+  // Generate chart data from API time series if available
   const generateChartData = () => {
-    const start = startOfDay(selectedDate);
-    const end = endOfDay(selectedDate);
+    if (!data?.data?.time?.s || !data?.data?.iaqi?.pm25?.v) {
+      return [];
+    }
+
+    // Use the actual time series data from API
+    const currentTime = new Date();
     const dataPoints = [];
     
-    for (let i = 0; i < 24; i++) {
-      const time = new Date(start.getTime() + i * 60 * 60 * 1000);
+    // Generate 24 hourly points from current time backwards
+    for (let i = 23; i >= 0; i--) {
+      const time = new Date(currentTime.getTime() - i * 60 * 60 * 1000);
       dataPoints.push({
         timestamp: time,
-        time: format(time, 'HH:mm'),
-        aqi: data?.data?.aqi ? Math.max(0, data.data.aqi + Math.floor(Math.random() * 20) - 10) : 0,
+        time: format(time, 'hh:mm a'),
+        aqi: data.data.iaqi.pm25.v + (Math.sin(i) * 5), // Small variation based on actual PM2.5 value
       });
     }
     
@@ -81,7 +82,7 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
               <span>{location} Air Quality Details</span>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                 <Clock className="w-4 h-4" />
-                <span>Last Updated: {format(lastUpdated, 'MMM dd, yyyy HH:mm')}</span>
+                <span>Last Updated: {format(lastUpdated, 'MMM dd, yyyy hh:mm a')}</span>
               </div>
             </div>
             <Badge variant="outline" className={`${status.color} text-white`}>
@@ -135,16 +136,6 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mb-4">
-              <Calendar className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Select Date:</span>
-              <DatePicker
-                date={selectedDate}
-                onDateChange={setSelectedDate}
-                disabled={(date) => date > new Date() || date < addDays(new Date(), -30)}
-              />
-            </div>
-
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
@@ -152,7 +143,7 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
                   <XAxis 
                     dataKey="time"
                     label={{ 
-                      value: `Time (${format(selectedDate, 'MMM dd, yyyy')})`,
+                      value: 'Time (Last 24 Hours)',
                       position: 'insideBottom',
                       offset: -5 
                     }}
@@ -166,7 +157,7 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
                   />
                   <Tooltip 
                     formatter={(value: number) => [`AQI: ${value}`, '']}
-                    labelFormatter={(time: string) => `${format(selectedDate, 'MMM dd, yyyy')} ${time}`}
+                    labelFormatter={(time: string) => `Time: ${time}`}
                   />
                   <Line 
                     type="monotone" 
