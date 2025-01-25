@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Prediction from "./pages/Prediction";
+import About from "./pages/About";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +26,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/prediction" element={<Prediction />} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </BrowserRouter>
         <Toaster />
