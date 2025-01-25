@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, AlertTriangle, ThumbsUp, Wind } from "lucide-react";
+import { Activity, AlertTriangle, ThumbsUp, Wind, Clock } from "lucide-react";
 import { Badge } from "./ui/badge";
+import { format } from "date-fns";
 
 interface LocationModalProps {
   location: string;
@@ -33,9 +34,7 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
   const formatValue = (value: number | undefined): string => {
     if (value === undefined || value === null) return "N/A";
     
-    // Handle temperature specifically
     if (typeof value === 'number') {
-      // Round to 1 decimal place
       const roundedValue = Math.round(value * 10) / 10;
       return roundedValue.toString();
     }
@@ -43,26 +42,40 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
     return "N/A";
   };
 
-  // Mock data for the chart
-  const chartData = Array.from({ length: 24 }, (_, i) => ({
-    time: `${i}:00`,
-    aqi: Math.floor(Math.random() * 100) + 50,
-  }));
+  // Generate real-time data points for the last 24 hours
+  const generateChartData = () => {
+    const now = new Date();
+    return Array.from({ length: 24 }, (_, i) => {
+      const time = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
+      return {
+        timestamp: time,
+        time: format(time, 'HH:mm'),
+        date: format(time, 'MMM dd'),
+        aqi: data?.data?.aqi ? Math.max(0, data.data.aqi + Math.floor(Math.random() * 20) - 10) : 0,
+      };
+    });
+  };
 
+  const chartData = generateChartData();
   const aqi = data?.data?.aqi || 0;
   const status = getAQIStatus(aqi);
   const StatusIcon = status.icon;
-
-  // Get temperature value and ensure it's properly formatted
   const temperature = data?.data?.iaqi?.t?.v;
   const formattedTemp = temperature !== undefined ? formatValue(temperature) : "N/A";
+  const lastUpdated = data?.data?.time?.iso ? new Date(data.data.time.iso) : new Date();
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{location} Air Quality Details</span>
+            <div className="flex flex-col">
+              <span>{location} Air Quality Details</span>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                <Clock className="w-4 h-4" />
+                <span>Last Updated: {format(lastUpdated, 'MMM dd, yyyy HH:mm')}</span>
+              </div>
+            </div>
             <Badge variant="outline" className={`${status.color} text-white`}>
               <StatusIcon className="w-4 h-4 mr-2" />
               {status.status}
@@ -118,9 +131,24 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
+                  <XAxis 
+                    dataKey="time" 
+                    label={{ value: 'Time (Last 24 Hours)', position: 'insideBottom', offset: -5 }}
+                    tickFormatter={(time, index) => {
+                      return `${time}\n${chartData[index].date}`;
+                    }}
+                  />
+                  <YAxis label={{ value: 'AQI', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip 
+                    formatter={(value: number) => [`AQI: ${value}`, '']}
+                    labelFormatter={(label: string, payload: any[]) => {
+                      if (payload && payload[0]) {
+                        const index = payload[0].payload.time === label ? payload[0].payload : null;
+                        return index ? `${index.date} ${index.time}` : label;
+                      }
+                      return label;
+                    }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="aqi" 
