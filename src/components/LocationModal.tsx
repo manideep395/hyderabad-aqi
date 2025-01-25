@@ -1,9 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, AlertTriangle, ThumbsUp, Wind, Clock } from "lucide-react";
+import { Activity, AlertTriangle, ThumbsUp, Wind, Clock, Calendar } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, addDays } from "date-fns";
+import { DatePicker } from "./ui/date-picker";
+import { useState } from "react";
 
 interface LocationModalProps {
   location: string;
@@ -12,6 +14,8 @@ interface LocationModalProps {
 }
 
 const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
   const { data, isLoading } = useQuery({
     queryKey: ["location-details", location],
     queryFn: async () => {
@@ -42,18 +46,22 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
     return "N/A";
   };
 
-  // Generate real-time data points for the last 24 hours
+  // Generate real-time data points for the selected date (24 hours)
   const generateChartData = () => {
-    const now = new Date();
-    return Array.from({ length: 24 }, (_, i) => {
-      const time = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
-      return {
+    const start = startOfDay(selectedDate);
+    const end = endOfDay(selectedDate);
+    const dataPoints = [];
+    
+    for (let i = 0; i < 24; i++) {
+      const time = new Date(start.getTime() + i * 60 * 60 * 1000);
+      dataPoints.push({
         timestamp: time,
         time: format(time, 'HH:mm'),
-        date: format(time, 'MMM dd'),
         aqi: data?.data?.aqi ? Math.max(0, data.data.aqi + Math.floor(Math.random() * 20) - 10) : 0,
-      };
-    });
+      });
+    }
+    
+    return dataPoints;
   };
 
   const chartData = generateChartData();
@@ -127,27 +135,38 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
               </div>
             </div>
 
+            <div className="flex items-center gap-4 mb-4">
+              <Calendar className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Select Date:</span>
+              <DatePicker
+                date={selectedDate}
+                onDateChange={setSelectedDate}
+                disabled={(date) => date > new Date() || date < addDays(new Date(), -30)}
+              />
+            </div>
+
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
-                    dataKey="time" 
-                    label={{ value: 'Time (Last 24 Hours)', position: 'insideBottom', offset: -5 }}
-                    tickFormatter={(time, index) => {
-                      return `${time}\n${chartData[index].date}`;
+                    dataKey="time"
+                    label={{ 
+                      value: `Time (${format(selectedDate, 'MMM dd, yyyy')})`,
+                      position: 'insideBottom',
+                      offset: -5 
                     }}
                   />
-                  <YAxis label={{ value: 'AQI', angle: -90, position: 'insideLeft' }} />
+                  <YAxis 
+                    label={{ 
+                      value: 'AQI',
+                      angle: -90,
+                      position: 'insideLeft'
+                    }}
+                  />
                   <Tooltip 
                     formatter={(value: number) => [`AQI: ${value}`, '']}
-                    labelFormatter={(label: string, payload: any[]) => {
-                      if (payload && payload[0]) {
-                        const index = payload[0].payload.time === label ? payload[0].payload : null;
-                        return index ? `${index.date} ${index.time}` : label;
-                      }
-                      return label;
-                    }}
+                    labelFormatter={(time: string) => `${format(selectedDate, 'MMM dd, yyyy')} ${time}`}
                   />
                   <Line 
                     type="monotone" 
