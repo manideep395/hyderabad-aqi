@@ -30,6 +30,30 @@ const locations = [
   { id: "14126", name: "IITH Kandi" }
 ];
 
+interface AQIData {
+  aqi: number;
+  pm25: number;
+  pm10: number;
+  no2: number;
+  o3: number;
+  co: number;
+  temperature: number;
+  humidity: number;
+  pressure: number;
+}
+
+const defaultData: AQIData = {
+  aqi: 0,
+  pm25: 0,
+  pm10: 0,
+  no2: 0,
+  o3: 0,
+  co: 0,
+  temperature: 0,
+  humidity: 0,
+  pressure: 0
+};
+
 const MainDashboard = () => {
   const { data: aqiData, isLoading } = useQuery({
     queryKey: ["telangana-aqi"],
@@ -44,7 +68,7 @@ const MainDashboard = () => {
       
       const validData = responses.filter(res => res.data?.aqi && typeof res.data.aqi === 'number');
       
-      const averages = {
+      const averages: AQIData = {
         aqi: 0,
         pm25: 0,
         pm10: 0,
@@ -70,7 +94,7 @@ const MainDashboard = () => {
 
       const count = validData.length || 1;
       Object.keys(averages).forEach(key => {
-        averages[key] = Math.round((averages[key] / count) * 10) / 10;
+        averages[key as keyof AQIData] = Math.round((averages[key as keyof AQIData] / count) * 10) / 10;
       });
 
       return averages;
@@ -85,7 +109,7 @@ const MainDashboard = () => {
     );
   }
 
-  const data = aqiData || { aqi: 0 };
+  const data = aqiData || defaultData;
 
   return (
     <div className="space-y-6">
