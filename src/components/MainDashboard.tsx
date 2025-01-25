@@ -136,7 +136,7 @@ const MainDashboard = () => {
         <div className="absolute inset-0 bg-opacity-10 bg-black"></div>
         <div className="relative z-10">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4 text-white flex items-center justify-center gap-3">
+            <h2 className="text-2xl font-bold mb-6 text-white flex items-center justify-center gap-3">
               <img 
                 src="https://static.thenounproject.com/png/3177592-200.png" 
                 alt="Air Quality Icon" 
@@ -144,22 +144,51 @@ const MainDashboard = () => {
               />
               Telangana Average Air Quality
             </h2>
-            <div className="flex justify-center items-center space-x-8">
-              <div className={`${aqiColor} bg-opacity-90 rounded-xl p-8 shadow-lg transition-all duration-300`}>
-                <div className="text-5xl font-bold text-white mb-2">{data.aqi}</div>
-                <div className={`text-lg font-semibold ${aqiTextColor}`}>{aqiText}</div>
-              </div>
-              <div className="text-left text-white space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+              {/* Left side statistics */}
+              <div className="text-left text-white space-y-3">
                 <p className="text-xl font-semibold">Daily Statistics</p>
-                <div className="space-y-1">
-                  <p className="text-sm">
-                    Highest: <span className="font-bold">{data.highestAQI}</span>
+                <div className="space-y-2">
+                  <p className="text-sm opacity-90">
+                    Monitoring Stations: <span className="font-bold">12</span>
                   </p>
-                  <p className="text-sm">
-                    Lowest: <span className="font-bold">{data.lowestAQI}</span>
+                  <p className="text-sm opacity-90">
+                    Last Updated: <span className="font-bold">{new Date().toLocaleTimeString()}</span>
                   </p>
-                  <p className="text-gray-200 text-sm">Average across 12 locations</p>
+                  <p className="text-sm opacity-90">
+                    Data Source: <span className="font-bold">TSPCB</span>
+                  </p>
                 </div>
+              </div>
+
+              {/* Center AQI display */}
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className={`${aqiColor} bg-opacity-90 rounded-xl p-8 shadow-lg w-full max-w-xs mx-auto`}>
+                  <div className="text-5xl font-bold text-white mb-2">{data.aqi}</div>
+                  <div className={`text-lg font-semibold ${aqiTextColor}`}>{aqiText}</div>
+                </div>
+                <div className="text-white text-center">
+                  <p className="text-sm mb-1">Today's Range</p>
+                  <div className="flex justify-center gap-4">
+                    <div>
+                      <p className="text-xs opacity-75">Lowest</p>
+                      <p className="font-bold">{data.lowestAQI}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs opacity-75">Highest</p>
+                      <p className="font-bold">{data.highestAQI}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side image */}
+              <div className="flex justify-center">
+                <img 
+                  src="https://static.thenounproject.com/png/3177592-200.png" 
+                  alt="Air Quality Icon Large" 
+                  className="w-32 h-32 invert opacity-90"
+                />
               </div>
             </div>
           </div>
