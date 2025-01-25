@@ -15,14 +15,44 @@ const getAQIText = (aqi: number) => {
   return "Unhealthy";
 };
 
+const locations = [
+  { id: "14135", name: "New Malakpet" },
+  { id: "14155", name: "Nacharam" },
+  { id: "14156", name: "ECIL" },
+  { id: "7022", name: "Hyderabad US" },
+  { id: "8677", name: "Bahadurpura Zoo Park" },
+  { id: "14125", name: "Somajiguda" },
+  { id: "8182", name: "Sanathnagar" },
+  { id: "14127", name: "Kokapet" },
+  { id: "11284", name: "Central University Hyderabad" },
+  { id: "11305", name: "Patancheruvu" },
+  { id: "9144", name: "IDA Pashamylaram" },
+  { id: "14126", name: "IITH Kandi" }
+];
+
 const MainDashboard = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["hyderabad-aqi"],
+  const { data: aqiData, isLoading } = useQuery({
+    queryKey: ["telangana-aqi"],
     queryFn: async () => {
-      const response = await fetch(
-        "https://api.waqi.info/feed/hyderabad/?token=demo"
+      // Fetch AQI data for all locations
+      const responses = await Promise.all(
+        locations.map(loc => 
+          fetch(`https://api.waqi.info/feed/@${loc.id}/?token=demo`)
+            .then(res => res.json())
+            .catch(() => ({ data: { aqi: 0 } }))
+        )
       );
-      return response.json();
+      
+      // Calculate average AQI
+      const validAqis = responses
+        .map(res => res.data?.aqi)
+        .filter(aqi => aqi && typeof aqi === 'number');
+      
+      const averageAqi = Math.round(
+        validAqis.reduce((sum, aqi) => sum + aqi, 0) / validAqis.length
+      );
+      
+      return averageAqi || 0;
     },
   });
 
@@ -34,19 +64,19 @@ const MainDashboard = () => {
     );
   }
 
-  const aqi = data?.data?.aqi || 0;
+  const aqi = aqiData || 0;
 
   return (
-    <Card className="p-6 shadow-lg">
+    <Card className="p-6 shadow-lg bg-white">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Hyderabad Air Quality</h2>
+        <h2 className="text-2xl font-bold mb-4">Telangana Average Air Quality</h2>
         <div className="flex justify-center items-center space-x-4">
-          <div className={`text-6xl font-bold ${getAQIColor(aqi)} bg-opacity-20 rounded-full p-8`}>
+          <div className={`text-6xl font-bold ${getAQIColor(aqi)} bg-opacity-20 rounded-full p-8 shadow-lg transform hover:scale-105 transition-transform duration-300`}>
             {aqi}
           </div>
           <div className="text-left">
             <p className="text-xl font-semibold">{getAQIText(aqi)}</p>
-            <p className="text-gray-600">Main Pollutant: PM2.5</p>
+            <p className="text-gray-600">Average across 12 locations</p>
           </div>
         </div>
       </div>

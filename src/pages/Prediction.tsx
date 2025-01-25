@@ -10,6 +10,8 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 interface AQIData {
   aqi: number;
@@ -95,134 +97,143 @@ const Prediction = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">AQI Prediction Simulator</h1>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
       
-      <Card className="p-6 space-y-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Location</label>
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((location) => (
-                  <SelectItem key={location.stationId} value={location.stationId}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Add padding-top to account for fixed header */}
+      <main className="flex-grow pt-48">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">AQI Prediction Simulator</h1>
+          
+          <Card className="p-6 space-y-6 mb-8 bg-white shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Location</label>
+                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location.stationId} value={location.stationId}>
+                        {location.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Future Date</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  disabled={(date) =>
-                    date < new Date() || date > addYears(new Date(), 30)
-                  }
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Future Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => date && setSelectedDate(date)}
+                      disabled={(date) =>
+                        date < new Date() || date > addYears(new Date(), 30)
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Trend Change (%)</label>
+                <Input
+                  type="number"
+                  value={trendPercentage}
+                  onChange={(e) => setTrendPercentage(Number(e.target.value))}
+                  placeholder="Enter percentage"
+                  min="-100"
+                  max="1000"
                 />
-              </PopoverContent>
-            </Popover>
-          </div>
+              </div>
+            </div>
+          </Card>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Trend Change (%)</label>
-            <Input
-              type="number"
-              value={trendPercentage}
-              onChange={(e) => setTrendPercentage(Number(e.target.value))}
-              placeholder="Enter percentage"
-              min="-100"
-              max="1000"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {parameters.map((param) => {
+              const predictionData = generatePredictionData(param.id, param.baseValue);
+              const currentValue = param.baseValue;
+              const finalValue = predictionData[predictionData.length - 1].value;
+
+              return (
+                <Card 
+                  key={param.id} 
+                  className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden bg-white"
+                  style={{
+                    background: `linear-gradient(225deg, ${getCardBackground(param.id, currentValue)})`,
+                    borderRadius: '1rem',
+                    perspective: '1000px'
+                  }}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-white">
+                      {param.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-white">
+                        <p className="text-sm opacity-80">Current Value</p>
+                        <p className="text-2xl font-bold">
+                          {currentValue} {param.unit}
+                        </p>
+                      </div>
+                      <div className="h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={predictionData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
+                            <XAxis 
+                              dataKey="date"
+                              stroke="white"
+                              tick={{ fill: 'white' }}
+                            />
+                            <YAxis 
+                              stroke="white"
+                              tick={{ fill: 'white' }}
+                            />
+                            <Tooltip />
+                            <Line 
+                              type="monotone" 
+                              dataKey="value" 
+                              stroke="#ffffff" 
+                              strokeWidth={2}
+                              dot={{ fill: "#ffffff" }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="text-white">
+                        <p className="text-sm opacity-80">Predicted Value (End of Period)</p>
+                        <p className="text-2xl font-bold">
+                          {finalValue} {param.unit}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {parameters.map((param) => {
-          const predictionData = generatePredictionData(param.id, param.baseValue);
-          const currentValue = param.baseValue;
-          const finalValue = predictionData[predictionData.length - 1].value;
-
-          return (
-            <Card 
-              key={param.id} 
-              className={`transform transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden`}
-              style={{
-                background: `linear-gradient(225deg, ${getCardBackground(param.id, currentValue)})`,
-                borderRadius: '1rem',
-                perspective: '1000px'
-              }}
-            >
-              <CardHeader>
-                <CardTitle className="text-white">
-                  {param.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-white">
-                    <p className="text-sm opacity-80">Current Value</p>
-                    <p className="text-2xl font-bold">
-                      {currentValue} {param.unit}
-                    </p>
-                  </div>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={predictionData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
-                        <XAxis 
-                          dataKey="date"
-                          stroke="white"
-                          tick={{ fill: 'white' }}
-                        />
-                        <YAxis 
-                          stroke="white"
-                          tick={{ fill: 'white' }}
-                        />
-                        <Tooltip />
-                        <Line 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="#ffffff" 
-                          strokeWidth={2}
-                          dot={{ fill: "#ffffff" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="text-white">
-                    <p className="text-sm opacity-80">Predicted Value (End of Period)</p>
-                    <p className="text-2xl font-bold">
-                      {finalValue} {param.unit}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

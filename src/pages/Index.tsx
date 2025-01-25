@@ -5,13 +5,14 @@ import LocationGrid from "@/components/LocationGrid";
 import Footer from "@/components/Footer";
 
 const Index = () => {
-  console.log("Index page rendering"); // Adding console log to track rendering
+  console.log("Index page rendering");
   
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-grow">
+      {/* Add padding-top to account for fixed header */}
+      <main className="flex-grow pt-48">
         <Hero />
         
         <div className="container mx-auto px-4 py-12 space-y-12">
