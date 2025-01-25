@@ -31,8 +31,16 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
   };
 
   const formatValue = (value: number | undefined): string => {
-    if (value === undefined) return "N/A";
-    return Number.isInteger(value) ? value.toString() : value.toFixed(1);
+    if (value === undefined || value === null) return "N/A";
+    
+    // Handle temperature specifically
+    if (typeof value === 'number') {
+      // Round to 1 decimal place
+      const roundedValue = Math.round(value * 10) / 10;
+      return roundedValue.toString();
+    }
+    
+    return "N/A";
   };
 
   // Mock data for the chart
@@ -44,6 +52,10 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
   const aqi = data?.data?.aqi || 0;
   const status = getAQIStatus(aqi);
   const StatusIcon = status.icon;
+
+  // Get temperature value and ensure it's properly formatted
+  const temperature = data?.data?.iaqi?.t?.v;
+  const formattedTemp = temperature !== undefined ? formatValue(temperature) : "N/A";
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -94,7 +106,7 @@ const LocationModal = ({ location, stationId, onClose }: LocationModalProps) => 
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Temperature</p>
-                <p className="text-2xl font-semibold">{formatValue(data?.data?.iaqi?.t?.v)}°C</p>
+                <p className="text-2xl font-semibold">{formattedTemp}°C</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Humidity</p>
