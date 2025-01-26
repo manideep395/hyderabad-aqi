@@ -27,6 +27,13 @@ interface PredictionReportProps {
       pm10: number;
       pm25: number;
     };
+    weather: {
+      temperature: number;
+      humidity: number;
+      windSpeed: number;
+      rainfall: number;
+      condition: string;
+    };
   };
   year: number;
   month: string;
@@ -251,7 +258,7 @@ const PredictionReport: React.FC<PredictionReportProps> = ({
                   <ThermometerSun className="w-8 h-8 text-orange-500" />
                   <div>
                     <p className="text-sm text-gray-600">Temperature</p>
-                    <p className="text-xl font-medium">{getTemperatureForTime()}°C</p>
+                    <p className="text-xl font-medium">{prediction.weather.temperature}°C</p>
                   </div>
                 </div>
               </Card>
@@ -260,7 +267,7 @@ const PredictionReport: React.FC<PredictionReportProps> = ({
                   <Droplets className="w-8 h-8 text-blue-500" />
                   <div>
                     <p className="text-sm text-gray-600">Humidity</p>
-                    <p className="text-xl font-medium">65%</p>
+                    <p className="text-xl font-medium">{prediction.weather.humidity}%</p>
                   </div>
                 </div>
               </Card>
@@ -269,16 +276,17 @@ const PredictionReport: React.FC<PredictionReportProps> = ({
                   <Wind className="w-8 h-8 text-teal-500" />
                   <div>
                     <p className="text-sm text-gray-600">Wind Speed</p>
-                    <p className="text-xl font-medium">12 km/h</p>
+                    <p className="text-xl font-medium">{prediction.weather.windSpeed} km/h</p>
                   </div>
                 </div>
               </Card>
-              <Card className="p-4 hover:shadow-lg transition-shadow bg-gradient-to-br from-gray-50 to-slate-50">
+              <Card className="p-4 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50">
                 <div className="flex items-center gap-3">
-                  <CloudRain className="w-8 h-8 text-gray-500" />
+                  <CloudRain className="w-8 h-8 text-indigo-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Weather</p>
-                    <p className="text-xl font-medium">Partly Cloudy</p>
+                    <p className="text-sm text-gray-600">Rainfall</p>
+                    <p className="text-xl font-medium">{prediction.weather.rainfall} mm</p>
+                    <p className="text-sm text-gray-500">{prediction.weather.condition}</p>
                   </div>
                 </div>
               </Card>

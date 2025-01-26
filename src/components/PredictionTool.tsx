@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { useQuery } from "@tanstack/react-query";
 import { locations } from "../data/locations";
 import { ArrowRight, Activity, Wind, Thermometer, Droplets, Calendar } from "lucide-react";
@@ -35,6 +36,7 @@ const PredictionTool = () => {
   });
 
   const [showPrediction, setShowPrediction] = useState(false);
+  const [currentPrediction, setCurrentPrediction] = useState<any>(null);
 
   const { data: currentData } = useQuery({
     queryKey: ["location-aqi", inputs.location],
@@ -47,23 +49,49 @@ const PredictionTool = () => {
     },
   });
 
+  const calculateWeatherConditions = (hour: number, month: string) => {
+    const seasonalBaseTemp = {
+      "December": 22, "January": 20, "February": 23,
+      "March": 28, "April": 32, "May": 36,
+      "June": 38, "July": 42, "August": 40,
+      "September": 35, "October": 30, "November": 25
+    };
+
+    const baseTemp = seasonalBaseTemp[month as keyof typeof seasonalBaseTemp] || 30;
+    const amplitude = 5;
+    const peakHour = 14;
+    const temperature = baseTemp + amplitude * Math.sin(((hour - peakHour) * Math.PI) / 12);
+    const baseHumidity = month.match(/June|July|August/) ? 60 : 75;
+    const humidity = baseHumidity - (amplitude * Math.sin(((hour - peakHour) * Math.PI) / 12));
+    const isRainyMonth = month.match(/June|July|August|September/);
+    const rainProbability = isRainyMonth ? 0.4 : 0.1;
+    const rainfall = Math.random() < rainProbability ? (Math.random() * 5).toFixed(1) : 0;
+
+    return {
+      temperature: Math.round(temperature),
+      humidity: Math.round(humidity),
+      windSpeed: 8 + Math.round(Math.random() * 8),
+      rainfall: Number(rainfall),
+      condition: rainfall > 0 ? "Rainy" : (Math.random() > 0.7 ? "Partly Cloudy" : "Clear")
+    };
+  };
+
   const calculatePrediction = () => {
     if (!currentData?.data) return null;
 
     const yearDifference = inputs.year - new Date().getFullYear();
-    const predictionFactor = 12;
     const currentAQI = currentData.data.aqi;
+    const hour = parseInt(inputs.specificTime.split(':')[0]);
 
-    // Seasonal adjustment factors
-    const seasonalFactors: { [key: string]: number } = {
-      "December": 1.2, "January": 1.2, "February": 1.2, // Winter
-      "March": 1.0, "April": 0.9, "May": 0.8, // Spring
-      "June": 0.7, "July": 0.7, "August": 0.7, // Summer
-      "September": 0.8, "October": 0.9, "November": 1.1 // Fall
+    const seasonalFactors = {
+      "December": 1.2, "January": 1.2, "February": 1.2,
+      "March": 1.0, "April": 0.9, "May": 0.8,
+      "June": 0.7, "July": 0.7, "August": 0.7,
+      "September": 0.8, "October": 0.9, "November": 1.1
     };
 
-    const seasonalFactor = seasonalFactors[inputs.month] || 1;
-    let predictedAQI = currentAQI * (1 + (yearDifference / predictionFactor)) * seasonalFactor;
+    const seasonalFactor = seasonalFactors[inputs.month as keyof typeof seasonalFactors] || 1;
+    let predictedAQI = currentAQI * (1 + (yearDifference / 12)) * seasonalFactor;
 
     if (inputs.trend === "increase") {
       predictedAQI *= (1 + (inputs.trendPercentage / 100));
@@ -71,9 +99,10 @@ const PredictionTool = () => {
       predictedAQI *= (1 - (inputs.trendPercentage / 100));
     }
 
-    // Time of day adjustment
     const timeAdjustment = inputs.timeSlot === "morning" ? 0.9 : 1.1;
     predictedAQI *= timeAdjustment;
+
+    const weatherConditions = calculateWeatherConditions(hour, inputs.month);
 
     return {
       current: {
@@ -86,28 +115,47 @@ const PredictionTool = () => {
       },
       predicted: {
         aqi: Math.round(predictedAQI),
-        no2: Math.round((currentData.data.iaqi.no2?.v || 0) * (1 + (yearDifference / predictionFactor)) * seasonalFactor),
-        o3: Math.round((currentData.data.iaqi.o3?.v || 0) * (1 + (yearDifference / predictionFactor)) * seasonalFactor),
-        co: Math.round((currentData.data.iaqi.co?.v || 0) * (1 + (yearDifference / predictionFactor)) * seasonalFactor),
-        pm10: Math.round((currentData.data.iaqi.pm10?.v || 0) * (1 + (yearDifference / predictionFactor)) * seasonalFactor),
-        pm25: Math.round((currentData.data.iaqi.pm25?.v || 0) * (1 + (yearDifference / predictionFactor)) * seasonalFactor),
-      }
+        no2: Math.round((currentData.data.iaqi.no2?.v || 0) * (1 + (yearDifference / 12)) * seasonalFactor),
+        o3: Math.round((currentData.data.iaqi.o3?.v || 0) * (1 + (yearDifference / 12)) * seasonalFactor),
+        co: Math.round((currentData.data.iaqi.co?.v || 0) * (1 + (yearDifference / 12)) * seasonalFactor),
+        pm10: calculatePM10Prediction(currentData.data.iaqi.pm10?.v || 0, yearDifference, inputs),
+        pm25: calculatePM25Prediction(currentData.data.iaqi.pm25?.v || 0, yearDifference, inputs),
+      },
+      weather: weatherConditions
     };
   };
 
-  const getAQIStatus = (aqi: number) => {
-    if (aqi <= 50) return { status: "Good", color: "bg-aqi-good" };
-    if (aqi <= 100) return { status: "Moderate", color: "bg-aqi-moderate" };
-    if (aqi <= 150) return { status: "Unhealthy for Sensitive Groups", color: "bg-aqi-unhealthy" };
-    return { status: "Hazardous", color: "bg-aqi-hazardous" };
+  const calculatePM10Prediction = (current: number, yearDifference: number, inputs: PredictionInputs) => {
+    const baseChange = current * (yearDifference / 10);
+    let predicted = current + baseChange;
+
+    if (inputs.trend === "increase") {
+      predicted *= (1 + (inputs.trendPercentage / 100));
+    } else if (inputs.trend === "decrease") {
+      predicted *= (1 - (inputs.trendPercentage / 100));
+    }
+
+    return Math.round(predicted);
+  };
+
+  const calculatePM25Prediction = (current: number, yearDifference: number, inputs: PredictionInputs) => {
+    const baseChange = current * (yearDifference / 12);
+    let predicted = current + baseChange;
+
+    if (inputs.trend === "increase") {
+      predicted *= (1 + (inputs.trendPercentage / 100));
+    } else if (inputs.trend === "decrease") {
+      predicted *= (1 - (inputs.trendPercentage / 100));
+    }
+
+    return Math.round(predicted);
   };
 
   const handlePredict = () => {
+    const prediction = calculatePrediction();
+    setCurrentPrediction(prediction);
     setShowPrediction(true);
   };
-
-  const prediction = calculatePrediction();
-  const aqiStatus = prediction ? getAQIStatus(prediction.predicted.aqi) : null;
 
   return (
     <div className="space-y-8">
@@ -209,13 +257,16 @@ const PredictionTool = () => {
           {inputs.trend !== "present" && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Trend Percentage</label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={inputs.trendPercentage}
-                onChange={(e) => setInputs(prev => ({ ...prev, trendPercentage: parseInt(e.target.value) }))}
-              />
+              <div className="pt-2">
+                <Slider
+                  value={[inputs.trendPercentage]}
+                  onValueChange={(value) => setInputs(prev => ({ ...prev, trendPercentage: value[0] }))}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-500 mt-1">{inputs.trendPercentage}%</span>
+              </div>
             </div>
           )}
         </div>
@@ -231,9 +282,9 @@ const PredictionTool = () => {
         </div>
       </Card>
 
-      {showPrediction && prediction && (
+      {showPrediction && currentPrediction && (
         <PredictionReport 
-          prediction={prediction}
+          prediction={currentPrediction}
           year={inputs.year}
           month={inputs.month}
           timeSlot={inputs.timeSlot}
