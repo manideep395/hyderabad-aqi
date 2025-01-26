@@ -1,69 +1,140 @@
-# Welcome to your Lovable project
+# Air Quality Index (AQI) Prediction System
 
-## Project info
+## Project Overview
+An advanced web application that predicts and analyzes Air Quality Index (AQI) using multiple AI/ML models, providing real-time data visualization and health recommendations based on environmental conditions.
 
-**URL**: https://lovable.dev/projects/c44b79dd-abc3-4d19-a8f0-5b0ae531793c
+## Live Demo
+Visit the [Live Demo](https://lovable.dev/projects/c44b79dd-abc3-4d19-a8f0-5b0ae531793c)
 
-## How can I edit this code?
+## Tech Stack
 
-There are several ways of editing your application.
+### Frontend
+- React 18.3.1 with TypeScript
+- Vite for build tooling
+- Tailwind CSS for styling
+- shadcn/ui for UI components
+- Tanstack Query for data fetching
+- Recharts for data visualization
+- Lucide React for icons
+- jsPDF & html2canvas for PDF generation
 
-**Use Lovable**
+### AI/ML Models
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c44b79dd-abc3-4d19-a8f0-5b0ae531793c) and start prompting.
+1. **Linear Regression Model (v1.0)**
+   - Basic AQI prediction using historical data
+   - Features: temperature, humidity, wind speed, rainfall
+   - Implementation: Custom mathematical formulas
 
-Changes made via Lovable will be committed automatically to this repo.
+2. **LSTM Model (v1.0)**
+   - Time series prediction with 24-hour sequence length
+   - Normalized feature processing
+   - Handles temporal dependencies in environmental data
 
-**Use your preferred IDE**
+3. **Random Forest Model (v1.0)**
+   - Feature importance analysis
+   - Multi-variable environmental prediction
+   - Confidence scoring system
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+4. **Transformer Model (v1.0)**
+   - Based on HuggingFace transformers
+   - Uses distilbert-base-uncased model
+   - WebGPU acceleration for processing
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+5. **Deep Learning Model (v1.0)**
+   - Neural network architecture: [Input(9) → Hidden(64,32,16) → Output(1)]
+   - Specialized for complex AQI predictions
+   - Feature engineering for environmental variables
 
-Follow these steps:
+### API Integrations
+- WAQI (World Air Quality Index) API for real-time data
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 1. AQI Prediction
+- Location-based air quality forecasting
+- Time and date-specific predictions
+- Seasonal trend analysis
+- Custom trend percentage adjustments
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 2. Weather Analysis
+- Temperature modeling and prediction
+- Humidity level forecasting
+- Wind speed calculations
+- Rainfall probability estimation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 3. Health Recommendations
+- Real-time health status based on AQI
+- Preventive measures and guidelines
+- Environmental impact analysis
+- Cause identification and solutions
+
+### 4. Data Visualization
+- Interactive charts and graphs
+- Current vs Predicted value comparisons
+- Weather condition displays
+- Downloadable PDF reports
+
+## Calculation Methods
+
+### Temperature Calculation
+```typescript
+temperature = baseTemp + amplitude * Math.sin(((hour - peakHour) * Math.PI) / 12)
+```
+
+### AQI Prediction
+```typescript
+predictedAQI = currentAQI * (1 + (yearDifference / 12)) * seasonalFactor
+```
+
+### Trend Adjustments
+```typescript
+if (trend === "increase") {
+  predictedAQI *= (1 + (trendPercentage / 100))
+} else if (trend === "decrease") {
+  predictedAQI *= (1 - (trendPercentage / 100))
+}
+```
+
+## Getting Started
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Start the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Usage
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Location Selection**
+   - Choose from available monitoring stations
+   - View real-time AQI data
 
-**Use GitHub Codespaces**
+2. **Prediction Configuration**
+   - Select future date and time
+   - Adjust trend parameters
+   - Choose seasonal factors
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. **Report Generation**
+   - View detailed predictions
+   - Download PDF reports
+   - Share results
 
-## What technologies are used for this project?
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-This project is built with .
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c44b79dd-abc3-4d19-a8f0-5b0ae531793c) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Acknowledgments
+- WAQI for providing real-time air quality data
+- HuggingFace for transformer models
+- shadcn/ui for component library
