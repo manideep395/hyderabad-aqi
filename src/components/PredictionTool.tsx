@@ -3,9 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { locations } from "../data/locations";
+import { ArrowRight, Activity, Wind, Thermometer, Droplets } from "lucide-react";
 
 interface PredictionInputs {
   location: string;
@@ -26,6 +26,8 @@ const PredictionTool = () => {
     trendPercentage: 0
   });
 
+  const [showPrediction, setShowPrediction] = useState(false);
+
   const { data: currentData } = useQuery({
     queryKey: ["location-aqi", inputs.location],
     queryFn: async () => {
@@ -40,13 +42,11 @@ const PredictionTool = () => {
     if (!currentData?.data) return null;
 
     const yearDifference = inputs.year - new Date().getFullYear();
-    const predictionFactor = 12; // Based on historical data
+    const predictionFactor = 12;
     const currentAQI = currentData.data.aqi;
 
-    // Calculate base prediction using present trend
     let predictedAQI = currentAQI * (1 + (yearDifference / predictionFactor));
 
-    // Adjust based on selected trend
     if (inputs.trend === "increase") {
       predictedAQI *= (1 + (inputs.trendPercentage / 100));
     } else if (inputs.trend === "decrease") {
@@ -63,7 +63,19 @@ const PredictionTool = () => {
     };
   };
 
+  const getAQIStatus = (aqi: number) => {
+    if (aqi <= 50) return { status: "Good", color: "bg-aqi-good" };
+    if (aqi <= 100) return { status: "Moderate", color: "bg-aqi-moderate" };
+    if (aqi <= 150) return { status: "Unhealthy for Sensitive Groups", color: "bg-aqi-unhealthy" };
+    return { status: "Hazardous", color: "bg-aqi-hazardous" };
+  };
+
+  const handlePredict = () => {
+    setShowPrediction(true);
+  };
+
   const prediction = calculatePrediction();
+  const aqiStatus = prediction ? getAQIStatus(prediction.aqi) : null;
 
   return (
     <div className="space-y-8">
@@ -156,35 +168,68 @@ const PredictionTool = () => {
             </div>
           )}
         </div>
+
+        <div className="mt-6 flex justify-center">
+          <Button 
+            onClick={handlePredict}
+            className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg flex items-center gap-2 transform hover:scale-105 transition-all"
+          >
+            Generate Prediction
+            <ArrowRight className="w-5 h-5" />
+          </Button>
+        </div>
       </Card>
 
-      {prediction && (
-        <Card className="p-6">
-          <h3 className="text-xl font-bold mb-4">Prediction Results</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted AQI</p>
-              <p className="text-2xl font-semibold">{prediction.aqi}</p>
+      {showPrediction && prediction && (
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+          <h3 className="text-2xl font-bold mb-6 text-center">Prediction Results for {inputs.year}</h3>
+          
+          <div className="mb-8">
+            <div className={`${aqiStatus?.color} text-white p-6 rounded-lg text-center transform hover:scale-105 transition-all`}>
+              <p className="text-4xl font-bold mb-2">{prediction.aqi}</p>
+              <p className="text-xl">{aqiStatus?.status}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted NO₂</p>
-              <p className="text-2xl font-semibold">{prediction.no2}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2 text-blue-600">
+                <Activity className="w-5 h-5" />
+                <p className="font-semibold">NO₂</p>
+              </div>
+              <p className="text-2xl font-bold">{prediction.no2}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted O₃</p>
-              <p className="text-2xl font-semibold">{prediction.o3}</p>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2 text-green-600">
+                <Wind className="w-5 h-5" />
+                <p className="font-semibold">O₃</p>
+              </div>
+              <p className="text-2xl font-bold">{prediction.o3}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted CO</p>
-              <p className="text-2xl font-semibold">{prediction.co}</p>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2 text-yellow-600">
+                <Thermometer className="w-5 h-5" />
+                <p className="font-semibold">CO</p>
+              </div>
+              <p className="text-2xl font-bold">{prediction.co}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted PM10</p>
-              <p className="text-2xl font-semibold">{prediction.pm10}</p>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2 text-purple-600">
+                <Droplets className="w-5 h-5" />
+                <p className="font-semibold">PM10</p>
+              </div>
+              <p className="text-2xl font-bold">{prediction.pm10}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Predicted PM2.5</p>
-              <p className="text-2xl font-semibold">{prediction.pm25}</p>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2 text-indigo-600">
+                <Droplets className="w-5 h-5" />
+                <p className="font-semibold">PM2.5</p>
+              </div>
+              <p className="text-2xl font-bold">{prediction.pm25}</p>
             </div>
           </div>
         </Card>
