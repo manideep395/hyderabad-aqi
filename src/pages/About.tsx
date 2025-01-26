@@ -41,7 +41,7 @@ const About = () => {
             <h2 className="text-3xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">Our Vision</h2>
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <p className="text-gray-700 leading-relaxed">
-                Our vision is to become a leading platform for real-time air quality monitoring in Telangana, providing critical insights that drive positive change in urban environments. By offering accurate data from multiple locations, we aim to raise awareness about air pollution and help mitigate its effects.
+                Our vision is to become a leading platform for real-time air quality monitoring in Hyderabad, providing critical insights that drive positive change in urban environments. By offering accurate data from multiple locations, we aim to raise awareness about air pollution and help mitigate its effects.
               </p>
             </div>
           </section>
