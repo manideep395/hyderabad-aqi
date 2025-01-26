@@ -64,7 +64,7 @@ const PredictionTool = () => {
     const amplitude = 5;
     const peakHour = 14;
     
-    // Ensure we're working with numbers in the calculation
+    // Use hourNum (guaranteed to be a number) in calculations
     const temperature = baseTemp + amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12);
     const baseHumidity = month.match(/June|July|August/) ? 60 : 75;
     const humidity = baseHumidity - (amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12));
