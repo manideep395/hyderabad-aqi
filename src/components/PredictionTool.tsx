@@ -49,7 +49,7 @@ const PredictionTool = () => {
     },
   });
 
-  const calculateWeatherConditions = (hour: number, month: string) => {
+  const calculateWeatherConditions = (hour: number | string, month: string) => {
     // Convert hour to number if it's a string
     const hourNum = typeof hour === 'string' ? parseInt(hour, 10) : hour;
     
