@@ -19,6 +19,31 @@ interface PredictionInputs {
   trendPercentage: number;
 }
 
+interface Prediction {
+  current: {
+    aqi: number;
+    no2: number;
+    o3: number;
+    co: number;
+    pm10: number;
+    pm25: number;
+  };
+  predicted: {
+    aqi: number;
+    no2: number;
+    o3: number;
+    co: number;
+    pm10: number;
+    pm25: number;
+  };
+  weather: {
+    temperature: number;
+    humidity: number;
+    pressure: number;
+    windSpeed: number;
+  };
+}
+
 const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -36,6 +61,7 @@ const PredictionTool = () => {
   });
 
   const [showPrediction, setShowPrediction] = useState(false);
+  const [currentPrediction, setCurrentPrediction] = useState<Prediction | null>(null);
 
   const { data: currentData } = useQuery({
     queryKey: ["location-aqi", inputs.location],
@@ -141,6 +167,12 @@ const PredictionTool = () => {
       "December": 21
     };
     return monthTemps[month] || 25;
+  };
+
+  const handleGeneratePrediction = () => {
+    const newPrediction = calculatePrediction();
+    setCurrentPrediction(newPrediction);
+    setShowPrediction(true);
   };
 
   return (
@@ -259,7 +291,7 @@ const PredictionTool = () => {
 
         <div className="mt-6 flex justify-center">
           <Button 
-            onClick={() => setShowPrediction(true)}
+            onClick={handleGeneratePrediction}
             className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg flex items-center gap-2 transform hover:scale-105 transition-all"
           >
             Generate Prediction
@@ -268,9 +300,9 @@ const PredictionTool = () => {
         </div>
       </Card>
 
-      {showPrediction && prediction && (
+      {showPrediction && currentPrediction && (
         <PredictionReport 
-          prediction={prediction}
+          prediction={currentPrediction}
           year={inputs.year}
           month={inputs.month}
           timeSlot={inputs.timeSlot}
