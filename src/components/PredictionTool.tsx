@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import { locations } from "./LocationGrid";
+import { locations } from "../data/locations";
 
 interface PredictionInputs {
   location: string;
