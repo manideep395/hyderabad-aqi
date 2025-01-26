@@ -50,6 +50,9 @@ const PredictionTool = () => {
   });
 
   const calculateWeatherConditions = (hour: number, month: string) => {
+    // Convert hour to number if it's a string
+    const hourNum = typeof hour === 'string' ? parseInt(hour, 10) : hour;
+    
     const seasonalBaseTemp = {
       "December": 22, "January": 20, "February": 23,
       "March": 28, "April": 32, "May": 36,
@@ -60,9 +63,11 @@ const PredictionTool = () => {
     const baseTemp = seasonalBaseTemp[month as keyof typeof seasonalBaseTemp] || 30;
     const amplitude = 5;
     const peakHour = 14;
-    const temperature = baseTemp + amplitude * Math.sin(((hour - peakHour) * Math.PI) / 12);
+    
+    // Ensure we're working with numbers in the calculation
+    const temperature = baseTemp + amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12);
     const baseHumidity = month.match(/June|July|August/) ? 60 : 75;
-    const humidity = baseHumidity - (amplitude * Math.sin(((hour - peakHour) * Math.PI) / 12));
+    const humidity = baseHumidity - (amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12));
     const isRainyMonth = month.match(/June|July|August|September/);
     const rainProbability = isRainyMonth ? 0.4 : 0.1;
     const rainfall = Math.random() < rainProbability ? (Math.random() * 5).toFixed(1) : 0;
