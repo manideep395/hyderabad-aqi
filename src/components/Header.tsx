@@ -10,12 +10,12 @@ const Header = () => {
             <div className="relative w-10 h-10">
               <div className="absolute w-full h-full">
                 <div className="w-full h-full bg-white rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-110 flex items-center justify-center">
-                  <span className="text-blue-600 text-xl font-bold">T</span>
+                  <span className="text-blue-600 text-xl font-bold">H</span>
                 </div>
               </div>
             </div>
             <Link to="/" className="text-xl font-bold text-white">
-              Telangana AQI
+              Hyderabad AQI
             </Link>
           </div>
           
@@ -23,6 +23,9 @@ const Header = () => {
           <nav className="flex space-x-6">
             <Link to="/" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               Dashboard
+            </Link>
+            <Link to="/prediction" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
+              Prediction
             </Link>
             <Link to="/about" className="text-white hover:text-blue-200 transition-colors text-sm font-medium">
               About

@@ -9,9 +9,9 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center animate-float">
-                <span className="text-blue-600 text-2xl font-bold">T</span>
+                <span className="text-blue-600 text-2xl font-bold">H</span>
               </div>
-              <span className="text-xl font-bold text-primary-foreground">Telangana AQI</span>
+              <span className="text-xl font-bold text-primary-foreground">Hyderabad AQI</span>
             </div>
           </div>
 
@@ -19,6 +19,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+              <li><Link to="/prediction" className="hover:text-primary transition-colors">Prediction Tool</Link></li>
               <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
             </ul>
           </div>
