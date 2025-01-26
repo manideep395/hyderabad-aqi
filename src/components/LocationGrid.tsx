@@ -20,6 +20,9 @@ const locations: LocationConfig[] = [
   { name: "Patancheruvu", stationId: "11305" },
   { name: "IDA Pashamylaram", stationId: "9144" },
   { name: "IITH Kandi", stationId: "14126" },
+  { name: "Kompally", stationId: "14149" },
+  { name: "Ramachandrapuram", stationId: "14140" },
+  { name: "Bollaram", stationId: "11295" }
 ];
 
 const LocationGrid = () => {

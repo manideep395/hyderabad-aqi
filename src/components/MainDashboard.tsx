@@ -35,7 +35,10 @@ const locations = [
   { id: "11284", name: "Central University Hyderabad" },
   { id: "11305", name: "Patancheruvu" },
   { id: "9144", name: "IDA Pashamylaram" },
-  { id: "14126", name: "IITH Kandi" }
+  { id: "14126", name: "IITH Kandi" },
+  { id: "14149", name: "Kompally" },
+  { id: "14140", name: "Ramachandrapuram" },
+  { id: "11295", name: "Bollaram" }
 ];
 
 interface AQIData {
@@ -68,7 +71,7 @@ const defaultData: AQIData = {
 
 const MainDashboard = () => {
   const { data: aqiData, isLoading } = useQuery({
-    queryKey: ["telangana-aqi"],
+    queryKey: ["hyderabad-aqi"],
     queryFn: async () => {
       const responses = await Promise.all(
         locations.map(loc => 
@@ -142,7 +145,7 @@ const MainDashboard = () => {
                 alt="Air Quality Icon" 
                 className="w-8 h-8 invert"
               />
-              Telangana Average Air Quality
+              Hyderabad Average Air Quality
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
               {/* Left side statistics */}
@@ -150,7 +153,7 @@ const MainDashboard = () => {
                 <p className="text-xl font-semibold">Daily Statistics</p>
                 <div className="space-y-2">
                   <p className="text-sm opacity-90">
-                    Monitoring Stations: <span className="font-bold">12</span>
+                    Monitoring Stations: <span className="font-bold">15</span>
                   </p>
                   <p className="text-sm opacity-90">
                     Last Updated: <span className="font-bold">{new Date().toLocaleTimeString()}</span>
