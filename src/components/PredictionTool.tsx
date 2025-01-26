@@ -64,20 +64,19 @@ const PredictionTool = () => {
     const amplitude = 5;
     const peakHour = 14;
     
-    // Use hourNum (guaranteed to be a number) in calculations
     const temperature = baseTemp + amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12);
     const baseHumidity = month.match(/June|July|August/) ? 60 : 75;
     const humidity = baseHumidity - (amplitude * Math.sin(((hourNum - peakHour) * Math.PI) / 12));
     const isRainyMonth = month.match(/June|July|August|September/);
     const rainProbability = isRainyMonth ? 0.4 : 0.1;
-    const rainfall = Math.random() < rainProbability ? (Math.random() * 5).toFixed(1) : 0;
+    const rainfall = Math.random() < rainProbability ? (Math.random() * 5).toFixed(1) : "0";
 
     return {
       temperature: Math.round(temperature),
       humidity: Math.round(humidity),
       windSpeed: 8 + Math.round(Math.random() * 8),
       rainfall: Number(rainfall),
-      condition: rainfall > 0 ? "Rainy" : (Math.random() > 0.7 ? "Partly Cloudy" : "Clear")
+      condition: Number(rainfall) > 0 ? "Rainy" : (Math.random() > 0.7 ? "Partly Cloudy" : "Clear")
     };
   };
 
