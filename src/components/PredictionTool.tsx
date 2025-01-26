@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { locations } from "../data/locations";
 import { ArrowRight, Activity, Wind, Thermometer, Droplets } from "lucide-react";
+import PredictionReport from "./PredictionReport";
 
 interface PredictionInputs {
   location: string;
@@ -181,7 +182,8 @@ const PredictionTool = () => {
       </Card>
 
       {showPrediction && prediction && (
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <>
+          <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
           <h3 className="text-2xl font-bold mb-6 text-center">Prediction Results for {inputs.year}</h3>
           
           <div className="mb-8">
@@ -232,7 +234,14 @@ const PredictionTool = () => {
               <p className="text-2xl font-bold">{prediction.pm25}</p>
             </div>
           </div>
-        </Card>
+          </Card>
+          
+          <PredictionReport 
+            prediction={prediction}
+            year={inputs.year}
+            location={locations.find(loc => loc.stationId === inputs.location)?.name || "Unknown Location"}
+          />
+        </>
       )}
     </div>
   );
