@@ -1,68 +1,108 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, ThermometerSun, Droplets, Wind, CloudRain } from "lucide-react";
+import { Download, Share2, ThermometerSun, Droplets, Wind, CloudRain, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { jsPDF } from "jspdf";
 
 interface PredictionReportProps {
   prediction: {
-    aqi: number;
-    no2: number;
-    o3: number;
-    co: number;
-    pm10: number;
-    pm25: number;
+    current: {
+      aqi: number;
+      no2: number;
+      o3: number;
+      co: number;
+      pm10: number;
+      pm25: number;
+    };
+    predicted: {
+      aqi: number;
+      no2: number;
+      o3: number;
+      co: number;
+      pm10: number;
+      pm25: number;
+    };
   };
   year: number;
+  month: string;
+  timeSlot: string;
+  specificTime: string;
   location: string;
 }
 
-const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, location }) => {
+const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, month, timeSlot, specificTime, location }) => {
   const getHealthRecommendations = (aqi: number) => {
     if (aqi <= 50) {
       return {
         status: "Good",
         recommendations: [
-          "Air quality is satisfactory",
-          "Outdoor activities are safe",
-          "Continue monitoring air quality"
+          "Continue outdoor activities normally",
+          "Keep windows open for ventilation",
+          "Perfect conditions for exercise",
+          "Ideal for sensitive groups to be outdoors"
         ],
-        causes: "Current pollution control measures are effective",
-        impact: "Maintaining these levels will ensure public health safety"
+        causes: "Effective pollution control and favorable weather conditions",
+        impact: "Maintaining these levels ensures optimal public health",
+        preventiveMeasures: [
+          "Continue supporting green initiatives",
+          "Maintain current emission controls",
+          "Monitor and report any sudden changes"
+        ]
       };
     } else if (aqi <= 100) {
       return {
         status: "Moderate",
         recommendations: [
           "Sensitive individuals should limit prolonged outdoor exposure",
-          "Consider indoor activities during peak pollution hours",
-          "Keep windows closed during high pollution periods"
+          "Consider indoor activities during peak hours",
+          "Keep windows closed during high pollution periods",
+          "Use air purifiers if available"
         ],
-        causes: "Increased vehicular emissions and industrial activities",
-        impact: "May lead to respiratory issues for sensitive groups"
+        causes: "Moderate increase in vehicular emissions and industrial activities",
+        impact: "May cause respiratory issues for sensitive groups",
+        preventiveMeasures: [
+          "Use public transportation when possible",
+          "Avoid burning materials outdoors",
+          "Regular maintenance of air purification systems"
+        ]
       };
     } else if (aqi <= 150) {
       return {
         status: "Unhealthy for Sensitive Groups",
         recommendations: [
           "Avoid prolonged outdoor activities",
-          "Wear masks when outdoors",
-          "Use air purifiers indoors"
+          "Wear N95 masks when outdoors",
+          "Use air purifiers indoors",
+          "Keep all windows closed",
+          "Stay updated with local air quality alerts"
         ],
-        causes: "Heavy industrial emissions, vehicle pollution, and construction activities",
-        impact: "Increased risk of respiratory diseases and cardiovascular problems"
+        causes: "High industrial emissions, vehicle pollution, and unfavorable weather",
+        impact: "Increased risk of respiratory and cardiovascular issues",
+        preventiveMeasures: [
+          "Implement stricter emission controls",
+          "Increase use of public transportation",
+          "Consider work-from-home options",
+          "Regular health check-ups"
+        ]
       };
     }
     return {
       status: "Hazardous",
       recommendations: [
-        "Stay indoors",
-        "Keep all windows closed",
-        "Use air purifiers",
-        "Wear N95 masks if outdoors is necessary"
+        "Stay indoors as much as possible",
+        "Seal windows and doors",
+        "Use air purifiers on maximum setting",
+        "Wear N95 masks if outdoors is necessary",
+        "Consider temporary relocation if persistent"
       ],
-      causes: "Severe industrial pollution, vehicle emissions, and adverse weather conditions",
-      impact: "Serious health risks for all population groups"
+      causes: "Severe industrial pollution, adverse weather conditions, and possible environmental emergencies",
+      impact: "Serious health risks for all population groups",
+      preventiveMeasures: [
+        "Immediate implementation of emergency pollution controls",
+        "Restrict non-essential outdoor activities",
+        "Enhanced monitoring of vulnerable populations",
+        "Emergency healthcare preparedness"
+      ]
     };
   };
 
@@ -73,31 +113,34 @@ const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, l
     doc.text(`Air Quality Prediction Report - ${location}`, 20, 20);
     
     doc.setFontSize(12);
-    doc.text(`Prediction for Year: ${year}`, 20, 30);
-    doc.text(`AQI: ${prediction.aqi}`, 20, 40);
-    doc.text(`Health Status: ${getHealthRecommendations(prediction.aqi).status}`, 20, 50);
+    doc.text(`Prediction for ${month} ${year}`, 20, 30);
+    doc.text(`Time: ${specificTime} (${timeSlot})`, 20, 40);
     
-    doc.text("Pollutant Levels:", 20, 70);
-    doc.text(`NO₂: ${prediction.no2}`, 30, 80);
-    doc.text(`O₃: ${prediction.o3}`, 30, 90);
-    doc.text(`CO: ${prediction.co}`, 30, 100);
-    doc.text(`PM10: ${prediction.pm10}`, 30, 110);
-    doc.text(`PM2.5: ${prediction.pm25}`, 30, 120);
+    doc.text("Current vs Predicted Values:", 20, 60);
+    doc.text(`AQI: ${prediction.current.aqi} → ${prediction.predicted.aqi}`, 30, 70);
+    doc.text(`NO₂: ${prediction.current.no2} → ${prediction.predicted.no2}`, 30, 80);
+    doc.text(`O₃: ${prediction.current.o3} → ${prediction.predicted.o3}`, 30, 90);
+    doc.text(`CO: ${prediction.current.co} → ${prediction.predicted.co}`, 30, 100);
+    doc.text(`PM10: ${prediction.current.pm10} → ${prediction.predicted.pm10}`, 30, 110);
+    doc.text(`PM2.5: ${prediction.current.pm25} → ${prediction.predicted.pm25}`, 30, 120);
     
-    const recommendations = getHealthRecommendations(prediction.aqi).recommendations;
-    doc.text("Health Recommendations:", 20, 140);
-    recommendations.forEach((rec, index) => {
-      doc.text(`• ${rec}`, 30, 150 + (index * 10));
+    const healthInfo = getHealthRecommendations(prediction.predicted.aqi);
+    doc.text("Health Status:", 20, 140);
+    doc.text(healthInfo.status, 30, 150);
+    
+    doc.text("Recommendations:", 20, 170);
+    healthInfo.recommendations.forEach((rec, index) => {
+      doc.text(`• ${rec}`, 30, 180 + (index * 10));
     });
     
-    doc.save(`aqi-prediction-${location}-${year}.pdf`);
+    doc.save(`aqi-prediction-${location}-${month}-${year}.pdf`);
   };
 
   const shareReport = async () => {
     try {
       await navigator.share({
         title: `AQI Prediction Report - ${location}`,
-        text: `Air Quality Prediction for ${location} in ${year}: AQI ${prediction.aqi}`,
+        text: `Air Quality Prediction for ${location} in ${month} ${year}: Current AQI ${prediction.current.aqi} → Predicted AQI ${prediction.predicted.aqi}`,
         url: window.location.href
       });
     } catch (error) {
@@ -105,7 +148,16 @@ const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, l
     }
   };
 
-  const healthInfo = getHealthRecommendations(prediction.aqi);
+  const healthInfo = getHealthRecommendations(prediction.predicted.aqi);
+  const getChangeIndicator = (current: number, predicted: number) => {
+    const diff = predicted - current;
+    const percentage = ((diff / current) * 100).toFixed(1);
+    return {
+      icon: diff > 0 ? ArrowUpRight : ArrowDownRight,
+      color: diff > 0 ? "text-red-500" : "text-green-500",
+      value: `${Math.abs(Number(percentage))}%`
+    };
+  };
 
   return (
     <div className="space-y-6">
@@ -133,6 +185,32 @@ const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, l
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <h4 className="font-semibold text-lg">Current vs Predicted Values</h4>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(prediction.current).map(([key, currentValue]) => {
+                const predictedValue = prediction.predicted[key as keyof typeof prediction.predicted];
+                const change = getChangeIndicator(currentValue, predictedValue);
+                const ChangeIcon = change.icon;
+                
+                return (
+                  <div key={key} className="p-4 rounded-lg bg-gray-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600 uppercase">{key}</span>
+                      <ChangeIcon className={`w-4 h-4 ${change.color}`} />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="text-2xl font-bold">{currentValue}</span>
+                      <span className="text-lg text-gray-500">→</span>
+                      <span className="text-2xl font-bold">{predictedValue}</span>
+                    </div>
+                    <span className={`text-sm ${change.color}`}>{change.value}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">Weather Conditions</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -166,30 +244,33 @@ const PredictionReport: React.FC<PredictionReportProps> = ({ prediction, year, l
               </div>
             </div>
           </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Health Status</h4>
-            <div className="p-4 rounded-lg bg-gray-50">
-              <p className="font-medium text-lg mb-2">{healthInfo.status}</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-                {healthInfo.recommendations.map((rec, index) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
 
         <div className="mt-6 space-y-4">
-          <h4 className="font-semibold text-lg">Impact Analysis</h4>
+          <h4 className="font-semibold text-lg">Health Status & Recommendations</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h5 className="font-medium mb-2">Causes of Change</h5>
-              <p className="text-gray-600">{healthInfo.causes}</p>
+            <div className="p-4 rounded-lg bg-gray-50">
+              <h5 className="font-medium mb-2">Status</h5>
+              <p className="text-lg font-semibold mb-2">{healthInfo.status}</p>
+              <div className="space-y-2">
+                {healthInfo.recommendations.map((rec, index) => (
+                  <p key={index} className="text-sm text-gray-600">• {rec}</p>
+                ))}
+              </div>
             </div>
-            <div>
-              <h5 className="font-medium mb-2">Long-term Impact</h5>
-              <p className="text-gray-600">{healthInfo.impact}</p>
+            <div className="space-y-4">
+              <div>
+                <h5 className="font-medium mb-2">Causes of Change</h5>
+                <p className="text-sm text-gray-600">{healthInfo.causes}</p>
+              </div>
+              <div>
+                <h5 className="font-medium mb-2">Preventive Measures</h5>
+                <div className="space-y-1">
+                  {healthInfo.preventiveMeasures.map((measure, index) => (
+                    <p key={index} className="text-sm text-gray-600">• {measure}</p>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
