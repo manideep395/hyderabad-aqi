@@ -102,7 +102,7 @@ const Footer = () => {
           <p className="mt-2 text-sm text-gray-400">
             Designed and developed by{" "}
             <a 
-              href="https://github.com/dspraneeth07" 
+              href="https://github.com/manideep395" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary hover:underline"
