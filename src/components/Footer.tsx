@@ -30,11 +30,11 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                <span>dspraneeth07@gmail.com</span>
+                <span>kasireddymanideepreddy405@gmail.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-5 w-5" />
-                <span>+91 7416466619</span>
+                <span>+91 9390424085</span>
               </li>
             </ul>
           </div>
@@ -52,7 +52,7 @@ const Footer = () => {
                 <Instagram className="h-6 w-6" />
               </a>
               <a 
-                href="https://linkedin.com/in/dspraneeth" 
+                href="https://linkedin.com/in/kasireddymr" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="hover:text-primary transition-colors"
@@ -107,7 +107,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Dhadi Sai Praneeth Reddy
+              Kasireddy Manideep Reddy
             </a>
           </p>
         </div>
